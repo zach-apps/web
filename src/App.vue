@@ -23,12 +23,12 @@ export default {
 }
 
 #app {
-  width: 100vw;
+  /* width: 100vw; */
   margin:0;
 }
 
 #router-view {
-  width: 100vw;
+  /* width: 100vw; */
 }
 
 a {
@@ -56,14 +56,6 @@ h1 {
 .menu {
   margin: 0 auto;
 }
-
-.menu * {
-  width: 100vw;
-}
-
-/* .menu > :nth-child(even) {
-  background-color: var(--grey);
-} */
 
 @media (max-width: 600px) {
 }
