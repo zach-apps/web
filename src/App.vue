@@ -37,7 +37,6 @@ a {
 }
 
 a:hover {
-    /*font-style: italic;*/
     color: var(--bright);
 }
 
@@ -55,23 +54,16 @@ h1 {
 }
 
 .menu {
-  display: flex;
-  flex-direction: column;
   margin: 0 auto;
-  text-align: center;
-  justify-content: center;
-    align-items: center;
-    height: 100vh;
 }
 
 .menu * {
   width: 100vw;
 }
 
-
-.menu > :nth-child(even) {
+/* .menu > :nth-child(even) {
   background-color: var(--grey);
-}
+} */
 
 @media (max-width: 600px) {
 }
