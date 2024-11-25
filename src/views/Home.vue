@@ -22,7 +22,7 @@ export default {
 .menu {
   font-family: "IBM Plex Mono", serif;
   text-align: left;
-  padding: 1em 0 0 1em; 
+  padding: 1em 1em 0 1em; 
 }
 
 ol {
@@ -35,6 +35,7 @@ li {
 
 .menu > li:hover .p {
     font-style: italic;
+    color: var(--dark);
 }
 
 .description::before {
@@ -48,6 +49,13 @@ li {
 
 .bold {
   font-weight: 600;
+}
+
+@media (hover: none) and (pointer: coarse), (max-width: 768px) {
+  .menu > li:hover .p {
+    font-style: initial;
+    color: initial;
+  }
 }
 
 </style>

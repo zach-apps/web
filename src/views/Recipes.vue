@@ -1,62 +1,110 @@
 <template>
   <div id="recipes-view">
-      <div class="left" @click="previouspage()"></div>
-      <div class="right" @click="nextpage()"></div>
-  <div id="recipes-width">
+    <div class="left" @click="previouspage()"></div>
+    <div class="right" @click="nextpage()"></div>
+    <div id="recipes-width">
       <router-link to="/" id="back-button">HOME</router-link>
 
-        <input @keyup.delete="deleteValue(`titlesInput`)" @keypress="suggestFilterTitles" @click="suggestFilterTitles" id="titlesInput" type="text" list="titlesList" value="" placeholder="enter a title...">
-        <input style='font-size:1em;font-weight:bolder' @keyup.enter="onEnterKeyword" @click="suggestFilterKeywords" @keypress="suggestFilterKeywords" id="keywordsInput" type="text" list="keywordsList" value="" placeholder="enter a keyword...">
-          <datalist id="titlesList"></datalist>
-          <datalist id="keywordsList"></datalist>
-        <div class="starbox">
-        <p style="margin-bottom:0;display:inline-block">
-            <span @click='clickstar(1)' id='1' class='fillstar'>★</span>
-            <span @click='clickstar(2)' id='2' class='fillstar'>★</span>
-            <span @click='clickstar(3)' id='3' class='fillstar'>★</span>
-            <span @click='clickstar(4)' id='4' class='fillstar'>★</span>
-            <span @click='clickstar(5)' id='5' class='fillstar'>★</span>
-        </p>
-        </div>
-        <h2 style="height:auto"></h2>
-        <div id="random" @click="shuffleRecipes()">🎰</div>
-        <div class="toggle-container">
-            <h2 v-for="filter in this.filters" :key="filter" class="toggle" @click="removeFilter(filter)">{{filter}}</h2>
+      <input
+        @input="suggestFilterTitles"
+        @click="suggestFilterTitles"
+        id="titlesInput"
+        type="text"
+        list="titlesList"
+        v-model="titleFilter"
+        placeholder="enter a title..."
+      />
 
-        </div>
+      <input
+        style="font-size: 1em; font-weight: bolder"
+        @input="suggestFilterKeywords"
+        @click="suggestFilterKeywords"
+        @keyup.enter="onEnterKeyword"
+        id="keywordsInput"
+        type="text"
+        list="keywordsList"
+        placeholder="enter a keyword..."
+      />
+      <datalist id="titlesList"></datalist>
+      <datalist id="keywordsList"></datalist>
+      <div class="starbox">
+        <p style="margin-bottom: 0; display: inline-block">
+          <span @click="clickstar(1)" id="1" class="fillstar">★</span>
+          <span @click="clickstar(2)" id="2" class="fillstar">★</span>
+          <span @click="clickstar(3)" id="3" class="fillstar">★</span>
+          <span @click="clickstar(4)" id="4" class="fillstar">★</span>
+          <span @click="clickstar(5)" id="5" class="fillstar">★</span>
+        </p>
+      </div>
+      <h2 style="height: auto"></h2>
+      <div id="random" @click="shuffleRecipes()">🎰</div>
+      <div class="toggle-container">
+        <h2
+          v-for="filter in this.filters"
+          :key="filter"
+          class="toggle"
+          @click="removeFilter(filter)"
+        >
+          {{filter}}
+        </h2>
+      </div>
       <hr />
 
-    <div class="relative">
-      <div v-if="show_items">
-        <div class="items">
-          <div v-for="recipe in recipes" :key="recipe.name" class="mobile-item-box">
-            <div class='mobile-item-box'>
-                <router-link :to="'/recipes/' + recipe.name" class="item" v-bind:style="'background: url(' + recipe.image +') no-repeat center top;'">
-                <div class="recipe-card">
+      <div class="relative">
+        <div v-if="show_items">
+          <div class="items">
+            <div
+              v-for="recipe in recipes"
+              :key="recipe.name"
+              class="mobile-item-box"
+            >
+              <div class="mobile-item-box">
+                <router-link
+                  :to="'/recipes/' + recipe.name"
+                  class="item"
+                  v-bind:style="'background: url(' + recipe.image +') no-repeat center top;'"
+                >
+                  <div class="recipe-card">
                     <h4>{{recipe.name}}</h4>
                     <h5>{{recipe.author}}</h5>
-                    <br>
-                    <h5><span style=";font-size:1.3em" v-for="i in recipe.rating" :key="i">★</span><span style="font-size:1.3em" v-for="i in 5 - recipe.rating" :key="i">☆</span><span class="light"> ({{formatRatingCount(recipe.ratingCount)}})</span> </h5>
+                    <br />
+                    <h5>
+                      <span
+                        style="font-size: 1.3em"
+                        v-for="i in recipe.rating"
+                        :key="i"
+                        >★</span
+                      ><span
+                        style="font-size: 1.3em"
+                        v-for="i in 5 - recipe.rating"
+                        :key="i"
+                        >☆</span
+                      ><span class="light">
+                        ({{formatRatingCount(recipe.ratingCount)}})</span
+                      >
+                    </h5>
                     <p class="invisible">:)</p>
-                </div>
-            </router-link></div>
+                  </div>
+                </router-link>
+              </div>
+            </div>
           </div>
+          <hr />
+          <div>{{num_pages}} | {{formatRatingCount(num_recipes)}} recipes</div>
         </div>
-        <hr>
-        <div>{{num_pages}} | {{formatRatingCount(num_recipes)}} recipes </div>
-
-      </div>
-        <div v-else style="width:100%">
-          <p class='mono'>no recipes fit the given filters.</p>
+        <div v-else style="width: 100%">
+          <p class="mono">no recipes fit the given filters.</p>
         </div>
       </div>
 
-    <div class="bottom-spacer top-spacer"></div>
-  </div>
+      <div class="bottom-spacer top-spacer"></div>
+    </div>
   </div>
 </template>
 
 <script>
+import { debounce } from 'lodash';
+
 export default {
   name: "RecipeView",
   // eslint-disable-next-line vue/no-computed-properties-in-data
@@ -71,7 +119,10 @@ export default {
        applyShuffle: false,
        rating: 5,
        // eslint-disable-next-line vue/no-computed-properties-in-data
-       author: this.currentAuthor
+       author: this.currentAuthor,
+       debouncedTitleFilter: null,
+       debouncedKeywordFilter: null,
+       isMobile: false
      }
    },
    watch:{
@@ -81,16 +132,64 @@ export default {
    },
 
    created() {
-      if (this.$route.params.id != "" & this.$route.params.id != null) {
-        let path = this.$route.path
-        if (path.indexOf("categories") != -1) {
-          this.filters.push(this.$route.params.id)
-        } else {
-            this.author = this.$route.params.id
-        }
+    // Setup debounced methods
+    this.debouncedTitleFilter = debounce(this.updateTitlesList, 300);
+    this.debouncedKeywordFilter = debounce(this.updateKeywordsList, 300);
+
+    // Check if mobile
+    this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // Handle route params
+    if (this.$route.params.id != "" && this.$route.params.id != null) {
+      let path = this.$route.path;
+      if (path.indexOf("categories") != -1) {
+        this.filters.push(this.$route.params.id);
+      } else {
+        this.author = this.$route.params.id;
       }
-   },
+    }
+  },
   methods: {
+        // New optimized methods for handling suggestions
+        updateTitlesList(value) {
+      if (!value) return;
+      value = value.toLowerCase();
+      let filtered_titles = Array.from(this.titles)
+        .filter(x => x.includes(value))
+        .slice(0, 50); // Limit results
+
+      const fillValue = filtered_titles
+        .map(title => `<option value="${title}">${title}</option>`)
+        .join('');
+
+      requestAnimationFrame(() => {
+        const titlesList = document.getElementById("titlesList");
+        if (titlesList) titlesList.innerHTML = fillValue;
+      });
+    },
+
+    updateKeywordsList(value) {
+      if (!value) return;
+      value = value.toLowerCase();
+      let filtered_keywords = this.keywords
+        .filter(x => x.includes(value) && !this.filters.includes(x) && x !== '')
+        .slice(0, 50); // Limit results
+
+      if (this.applyShuffle) {
+        filtered_keywords = this.shuffle(filtered_keywords);
+      }
+
+      const fillValue = filtered_keywords
+        .map(keyword => `<option value="${keyword.trim()}">${keyword.trim()}</option>`)
+        .join('');
+
+      requestAnimationFrame(() => {
+        const keywordsList = document.getElementById("keywordsList");
+        if (keywordsList) keywordsList.innerHTML = fillValue;
+      });
+    },
+
+
     shuffleRecipes() {
         let value = document.getElementById("random").innerHTML
         document.getElementById("random").innerHTML = (value.includes("📁"))?"🎰":"📁"
@@ -127,43 +226,47 @@ export default {
         }
         this.filters = this.filters.filter(x => x != filter)
     },
-    onEnterKeyword() {
-        let value = document.getElementById("keywordsInput").value
-        if (!this.filters.includes(value)) {
-            this.filters.push(value)
-        }
-        document.getElementById("keywordsInput").value = ""
-        this.suggestFilterKeywords()
+
+    onEnterKeyword(event) {
+      const input = document.getElementById("keywordsInput");
+      const value = input.value.toLowerCase().trim();
+
+      // Only add non-empty values that aren't already in filters
+      if (value && !this.filters.includes(value)) {
+        this.filters.push(value);
+        input.value = ""; // Clear the input
+        this.debouncedKeywordFilter(""); // Reset suggestions
+
+        // Force update the keywordsList
+        requestAnimationFrame(() => {
+          const keywordsList = document.getElementById("keywordsList");
+          if (keywordsList) keywordsList.innerHTML = "";
+        });
+      }
     },
+
     deleteValue(id) {
       this.titleFilter = document.getElementById(id).value
     },
-    suggestFilterTitles() {
-      this.pageNumber = 0
-      let value = document.getElementById("titlesInput").value.toLowerCase()
-      let filtered_titles = Array.from(this.titles).filter(x => x.includes(value))
-      let fillValue = ""
-      for (let title of filtered_titles) {
-        fillValue += "<option value='" + title + "'>" + title + "</option>"
-      }
-      document.getElementById("titlesList").innerHTML = fillValue
-      this.titleFilter = value
-    },
-    suggestFilterKeywords() {
-      this.pageNumber = 0
-      let value = document.getElementById("keywordsInput").value.toLowerCase()
-      let filtered_keywords = this.keywords.filter(x => x.includes(value))
 
-      filtered_keywords = filtered_keywords.filter(x => !this.filters.includes(x) & x != "")
-      filtered_keywords = this.shuffle(filtered_keywords)
 
-      let fillValue = ""
-      for (let keyword of filtered_keywords) {
-        keyword = keyword.trim()
-        fillValue += "<option value='" + keyword + "'>" + keyword + "</option>"
-      }
-      document.getElementById("keywordsList").innerHTML = fillValue
+    suggestFilterTitles(event) {
+      if (this.isMobile && event.type === 'keypress') return;
+
+      const value = event.target.value.toLowerCase();
+      this.titleFilter = value;
+      this.pageNumber = 0;
+      this.debouncedTitleFilter(value);
     },
+
+    suggestFilterKeywords(event) {
+      if (this.isMobile && event.type === 'keypress') return;
+
+      const value = event.target.value.toLowerCase();
+      this.pageNumber = 0;
+      this.debouncedKeywordFilter(value);
+    },
+
     previouspage() {
       console.log(this.pageNumber)
       if (this.pageNumber > 0) {
@@ -287,12 +390,10 @@ export default {
 };
 </script>
 
-
 <style lang="css" scoped>
-
 #back-button:hover {
-    background-color: var(--bright);
-    font-style:italic;
+  background-color: var(--bright);
+  font-style: italic;
 }
 
 #back-button {
@@ -318,8 +419,6 @@ export default {
   margin: 6em auto;
 }
 
-
-
 .left,
 .right {
   position: fixed;
@@ -339,24 +438,23 @@ export default {
   opacity: 0.5;
 }
 
-
 h4 {
   font-family: "Playfair Display", serif;
-    font-size: 1.5em;
-    line-height: 1.2em;
+  font-size: 1.5em;
+  line-height: 1.2em;
 }
 
 .starbox {
- width:328px;
- display:flex;
- justify-content:space-between;
- align-items: end;
+  width: 328px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
 }
 
 #random {
- font-size:2em;
- cursor:pointer;
- margin:0 1em 0 0;
+  font-size: 2em;
+  cursor: pointer;
+  margin: 0 1em 0 0;
 }
 
 .toggle:hover {
@@ -364,13 +462,13 @@ h4 {
 }
 
 .toggle-container {
-  display:flex;
-  flex-wrap:wrap;
-  margin-bottom:1em;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1em;
 }
 
 .toggle {
-  margin: .2em 1em 0 0;
+  margin: 0.2em 1em 0 0;
   cursor: pointer;
   color: var(--dark);
 }
@@ -379,26 +477,25 @@ h4 {
   color: var(--bright);
 }
 
-
 .item h4 {
-    margin:0;
-    margin-bottom: 1.5em;
-    height:70px;
+  margin: 0;
+  margin-bottom: 1.5em;
+  height: 70px;
 }
 
 .item:hover .recipe-card {
-    border-color:var(--bright);
+  border-color: var(--bright);
 }
 .recipe-card {
-    background-color: var(--bright);
-    color: white;
-    padding:.7em 1em;
-    margin:0;
+  background-color: var(--bright);
+  color: white;
+  padding: 0.7em 1em;
+  margin: 0;
 }
 
 .item {
-  box-sizing:border-box;
-  border-bottom:0;
+  box-sizing: border-box;
+  border-bottom: 0;
   display: inline-block;
   margin-top: 0;
   background-color: var(--bright);
@@ -409,30 +506,24 @@ h4 {
   cursor: pointer;
 }
 
-/*
-.items:hover > *:not(:hover) {
-  opacity: .9 !important;
-}
-*/
-
 .relative {
   position: relative;
 }
 
 .outlinestar {
-    color:var(--dark);
-    font-size:2em;
-    cursor:pointer;
+  color: var(--dark);
+  font-size: 2em;
+  cursor: pointer;
 }
 
 .fillstar {
-    color:var(--bright);
-    font-size:2em;
-    cursor:pointer;
+  color: var(--bright);
+  font-size: 2em;
+  cursor: pointer;
 }
 
 .mobile-item-box {
-   margin-top:.75em;
+  margin-top: 0.75em;
 }
 
 .items {
@@ -444,46 +535,45 @@ h4 {
   column-gap: 2em;
   height: auto;
   flex-wrap: wrap;
-  margin-bottom:2em;
+  margin-bottom: 2em;
 }
 
 h4 {
-    font-weight:normal;
-    margin-bottom:0;
-    padding-bottom:0;
+  font-weight: normal;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .light {
- font-weight: 200;
+  font-weight: 200;
 }
 
-
 h5 {
-display:inline-block;
-    margin:0;
-    padding:0;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
 }
 
 .nowrap-flex {
-    display:flex;
-    wrap:nowrap;
+  display: flex;
+  wrap: nowrap;
 }
 .invisible {
-  opacity:0;
-  height:.4em;
-  margin:0;
-  padding:0;
+  opacity: 0;
+  height: 0.4em;
+  margin: 0;
+  padding: 0;
 }
 
 input {
-    color: var(--dark);
-    font-size: 1.5em;
-    border: 0;
-    outline: none;
-    padding: 10px 20px;
-    background-color: var(--grey);
-    margin:.5em 0em;
-    display:block;
+  color: var(--dark);
+  font-size: 1.5em;
+  border: 0;
+  outline: none;
+  padding: 10px 20px;
+  background-color: var(--grey);
+  margin: 0.5em 0em;
+  display: block;
 }
 @media screen and (max-width: 1000px) {
   .h-flex {
@@ -501,11 +591,11 @@ input {
   }
 
   #titlesInput {
-    width:100%;
+    width: 100%;
   }
 
   .item h4 {
-    margin-bottom:2em;
+    margin-bottom: 2em;
   }
 
   .item h5 {
@@ -513,12 +603,12 @@ input {
     line-height: 1.5em;
   }
   .mobile-item-box {
-       width:100%;
-   }
+    width: 100%;
+  }
 
-    #recipes-width {
-      width: 80vw;
-      margin-top: 0;
-    }
+  #recipes-width {
+    width: 80vw;
+    margin-top: 0;
+  }
 }
 </style>

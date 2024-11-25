@@ -3,8 +3,7 @@ module.exports = {
 
   // Add "plugin:vue/vue3-essential" or "plugin:vue/recommended" for Vue 3 projects
   extends: [
-    'plugin:vue/essential',
-    // ...other extends configurations
+'plugin:vue/recommended',    // ...other extends configurations
   ],
 
   plugins: [

@@ -37,7 +37,7 @@ a {
 }
 
 a:hover {
-    color: var(--bright);
+    color: var(--bright) !important;
 }
 
 body {
@@ -57,7 +57,10 @@ h1 {
   margin: 0 auto;
 }
 
-@media (max-width: 600px) {
+@media (hover: none) and (pointer: coarse), (max-width: 768px) {
+    a:hover {
+      color: initial;
+    }
 }
 
 </style>
